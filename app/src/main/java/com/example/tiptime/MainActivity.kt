@@ -19,6 +19,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -68,7 +69,13 @@ fun TipTimeLayout() {
     // 考虑我们的需求,需要在TipTimeLayout下的 text 显示tip的金额,所以将状态属性提取到 text 和 EditNumberField 共同的父级组件, 这就是状态提升
     var amountInput by remember { mutableStateOf("") }
     val amount = amountInput.toDoubleOrNull() ?: 0.0
-    val tip = calculateTip(amount)
+
+    // 创建一个状态属性负责接收输入的小费百分比
+    var tipInput by remember { mutableStateOf("") }
+    val tipPercent = tipInput.toDoubleOrNull() ?: 0.0
+
+    // 根据账单金额和小费百分比计算小费的实际值
+    val tip = calculateTip(amount, tipPercent)
 
     Column(
         modifier = Modifier
@@ -89,9 +96,19 @@ fun TipTimeLayout() {
         )
         // 添加一个输入框,输入账单的价格
         EditNumberField(
+            label = R.string.bill_amount,
             // 因为状态提升,state 属性不再定义在EditNumberField内,而是传递进去
             value = amountInput,
             onValueChange = { amountInput = it },
+            modifier = Modifier
+                .padding(bottom = 32.dp)
+                .fillMaxWidth(),
+        )
+        // 添加一个输入框,输入小费的百分比
+        EditNumberField(
+            label = R.string.how_was_the_service,
+            value = tipInput,
+            onValueChange = { tipInput = it },
             modifier = Modifier
                 .padding(bottom = 32.dp)
                 .fillMaxWidth(),
@@ -108,13 +125,16 @@ fun TipTimeLayout() {
 // 自定义一个输入框组件
 @Composable
 fun EditNumberField(
+    // 添加一个形参, 来接收 strings.xml 中的字符资源的 id, 因为我们将会重用这个EditNumberField组件, 我们需要指定显示的字符串
+    // 同时也添加了@StringRes注解,检查接收的不是一个随意的 int 值而是一个字符串资源 id
+    @StringRes label: Int,
     value: String,
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     TextField(
         // label是 textfield 的占位文字,这里可以看到接受了一个函数,也就是说我们可以在这里写 if 判断,根据不同场显示不同的占位文字
-        label = { Text(text = stringResource(id = R.string.bill_amount)) },
+        label = { Text(text = stringResource(id = label)) },
         value = value,
         // 用户输入后的回调方法,根据定义onValueChange: (String) -> Unit,所以我们需要更新amountInput, 且每次更新都会触发EditNumberField组件重组,因为amountInput是一个 state 属性
         onValueChange = onValueChange,
