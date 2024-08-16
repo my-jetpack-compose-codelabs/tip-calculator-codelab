@@ -21,6 +21,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
+import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -216,7 +217,10 @@ fun RoundTheTipRow(
  * according to the local currency.
  * Example would be "$10.00".
  */
-private fun calculateTip(
+// 添加一个注解,使这个方法面向测试公开
+@VisibleForTesting
+// 修改可见性为internal, private 表只在本文件或者本类中课件, internal表在模块内可见, 我们为了要测试这个方法,需要改为internal
+internal fun calculateTip(
     amount: Double,
     tipPercent: Double = 15.0,
     roundUp: Boolean
