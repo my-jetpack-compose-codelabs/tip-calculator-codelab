@@ -28,6 +28,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -40,6 +41,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.tiptime.ui.theme.TipTimeTheme
@@ -63,6 +65,11 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun TipTimeLayout() {
+    // 考虑我们的需求,需要在TipTimeLayout下的 text 显示tip的金额,所以将状态属性提取到 text 和 EditNumberField 共同的父级组件, 这就是状态提升
+    var amountInput by remember { mutableStateOf("") }
+    val amount = amountInput.toDoubleOrNull() ?: 0.0
+    val tip = calculateTip(amount)
+
     Column(
         modifier = Modifier
             .statusBarsPadding()
@@ -82,12 +89,16 @@ fun TipTimeLayout() {
         )
         // 添加一个输入框,输入账单的价格
         EditNumberField(
+            // 因为状态提升,state 属性不再定义在EditNumberField内,而是传递进去
+            value = amountInput,
+            onValueChange = { amountInput = it },
             modifier = Modifier
-            .padding(bottom = 32.dp)
-            .fillMaxWidth()
+                .padding(bottom = 32.dp)
+                .fillMaxWidth(),
         )
         Text(
-            text = stringResource(R.string.tip_amount, "$0.00"),
+            // 因为 amountInput 提升了层级,所以这里也可获取到计算出来的 tip 了,我们这里不再使用定制而是tip的值
+            text = stringResource(R.string.tip_amount, tip),
             style = MaterialTheme.typography.displaySmall
         )
         Spacer(modifier = Modifier.height(150.dp))
@@ -96,15 +107,21 @@ fun TipTimeLayout() {
 
 // 自定义一个输入框组件
 @Composable
-fun EditNumberField(modifier: Modifier = Modifier) {
-    // 创建一个状态属性负责接受和现实用户输入的文字, 且这个属性必须使用remember
-    // 和传统的 xml 开发不同,jetpack compose 开发中组件会频繁的销毁重组,所以不使用remember管理状态,state 数据会在重组后消失
-    var amountInput by remember { mutableStateOf("") }
+fun EditNumberField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
     TextField(
-        value = amountInput,
+        // label是 textfield 的占位文字,这里可以看到接受了一个函数,也就是说我们可以在这里写 if 判断,根据不同场显示不同的占位文字
+        label = { Text(text = stringResource(id = R.string.bill_amount)) },
+        value = value,
         // 用户输入后的回调方法,根据定义onValueChange: (String) -> Unit,所以我们需要更新amountInput, 且每次更新都会触发EditNumberField组件重组,因为amountInput是一个 state 属性
-        onValueChange = { amountInput = it },
-        modifier = modifier
+        onValueChange = onValueChange,
+        modifier = modifier,
+        singleLine = true,
+        // 指定是数字键盘
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
     )
 }
 /**
