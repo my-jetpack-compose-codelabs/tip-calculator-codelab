@@ -33,6 +33,10 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -78,7 +82,9 @@ fun TipTimeLayout() {
         )
         // 添加一个输入框,输入账单的价格
         EditNumberField(
-            modifier = Modifier.padding(bottom = 32.dp).fillMaxWidth()
+            modifier = Modifier
+            .padding(bottom = 32.dp)
+            .fillMaxWidth()
         )
         Text(
             text = stringResource(R.string.tip_amount, "$0.00"),
@@ -91,9 +97,13 @@ fun TipTimeLayout() {
 // 自定义一个输入框组件
 @Composable
 fun EditNumberField(modifier: Modifier = Modifier) {
+    // 创建一个状态属性负责接受和现实用户输入的文字, 且这个属性必须使用remember
+    // 和传统的 xml 开发不同,jetpack compose 开发中组件会频繁的销毁重组,所以不使用remember管理状态,state 数据会在重组后消失
+    var amountInput by remember { mutableStateOf("") }
     TextField(
-        value = "",
-        onValueChange = {},
+        value = amountInput,
+        // 用户输入后的回调方法,根据定义onValueChange: (String) -> Unit,所以我们需要更新amountInput, 且每次更新都会触发EditNumberField组件重组,因为amountInput是一个 state 属性
+        onValueChange = { amountInput = it },
         modifier = modifier
     )
 }
