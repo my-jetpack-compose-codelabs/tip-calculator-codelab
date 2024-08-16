@@ -19,6 +19,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -35,6 +36,7 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
@@ -47,6 +49,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -109,6 +112,7 @@ fun TipTimeLayout() {
         // 添加一个输入框,输入账单的价格
         EditNumberField(
             label = R.string.bill_amount,
+            leadingIcon = R.drawable.money,
             keyboardOptions = KeyboardOptions.Default.copy(
                 keyboardType = KeyboardType.Number,
                 // 指定键盘的 Done 键行为是 移动到下一个输入框
@@ -124,6 +128,7 @@ fun TipTimeLayout() {
         // 添加一个输入框,输入小费的百分比
         EditNumberField(
             label = R.string.how_was_the_service,
+            leadingIcon = R.drawable.percent,
             keyboardOptions = KeyboardOptions.Default.copy(
                 keyboardType = KeyboardType.Number,
                 // 指定键盘的 Done 键行为是 Done
@@ -155,6 +160,8 @@ fun EditNumberField(
     // 添加一个形参, 来接收 strings.xml 中的字符资源的 id, 因为我们将会重用这个EditNumberField组件, 我们需要指定显示的字符串
     // 同时也添加了@StringRes注解,检查接收的不是一个随意的 int 值而是一个字符串资源 id
     @StringRes label: Int,
+    // 这个形参接受的 Icon 资源的 id
+    @DrawableRes leadingIcon: Int,
     // 添加一个形参, 接受键盘的配置
     keyboardOptions: KeyboardOptions,
     value: String,
@@ -164,6 +171,14 @@ fun EditNumberField(
     TextField(
         // label是 textfield 的占位文字,这里可以看到接受了一个函数,也就是说我们可以在这里写 if 判断,根据不同场显示不同的占位文字
         label = { Text(text = stringResource(id = label)) },
+        // 设置TextField的leadingIcon
+        leadingIcon = {
+            // 这里使用了painter这个通用的接口, 其他的还有imageVector(矢量图)和bitmap(位图)的方式
+            Icon(
+                painter = painterResource(id = leadingIcon),
+                contentDescription = null
+            )
+        },
         value = value,
         // 用户输入后的回调方法,根据定义onValueChange: (String) -> Unit,所以我们需要更新amountInput, 且每次更新都会触发EditNumberField组件重组,因为amountInput是一个 state 属性
         onValueChange = onValueChange,
