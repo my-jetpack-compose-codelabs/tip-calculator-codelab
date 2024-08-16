@@ -42,6 +42,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -97,6 +98,11 @@ fun TipTimeLayout() {
         // 添加一个输入框,输入账单的价格
         EditNumberField(
             label = R.string.bill_amount,
+            keyboardOptions = KeyboardOptions.Default.copy(
+                keyboardType = KeyboardType.Number,
+                // 指定键盘的 Done 键行为是 移动到下一个输入框
+                imeAction = ImeAction.Next
+            ),
             // 因为状态提升,state 属性不再定义在EditNumberField内,而是传递进去
             value = amountInput,
             onValueChange = { amountInput = it },
@@ -107,6 +113,11 @@ fun TipTimeLayout() {
         // 添加一个输入框,输入小费的百分比
         EditNumberField(
             label = R.string.how_was_the_service,
+            keyboardOptions = KeyboardOptions.Default.copy(
+                keyboardType = KeyboardType.Number,
+                // 指定键盘的 Done 键行为是 Done
+                imeAction = ImeAction.Done
+            ),
             value = tipInput,
             onValueChange = { tipInput = it },
             modifier = Modifier
@@ -128,6 +139,8 @@ fun EditNumberField(
     // 添加一个形参, 来接收 strings.xml 中的字符资源的 id, 因为我们将会重用这个EditNumberField组件, 我们需要指定显示的字符串
     // 同时也添加了@StringRes注解,检查接收的不是一个随意的 int 值而是一个字符串资源 id
     @StringRes label: Int,
+    // 添加一个形参, 接受键盘的配置
+    keyboardOptions: KeyboardOptions,
     value: String,
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier
@@ -140,8 +153,8 @@ fun EditNumberField(
         onValueChange = onValueChange,
         modifier = modifier,
         singleLine = true,
-        // 指定是数字键盘
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+        // 使TextField可以接受外部传入的键盘配置
+        keyboardOptions = keyboardOptions
     )
 }
 /**
